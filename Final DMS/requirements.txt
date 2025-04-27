@@ -1,0 +1,10 @@
+time
+Crypto.Cipher
+hashlib
+os
+matplotlib
+Crypto.Random
+Crypto.Util.Padding
+flask
+fitz
+docx
