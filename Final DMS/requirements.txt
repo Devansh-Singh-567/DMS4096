@@ -8,3 +8,4 @@ Crypto.Util.Padding
 flask
 fitz
 docx
+gunicorn
