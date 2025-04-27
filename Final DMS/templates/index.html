@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+    <h1>Encryption</h1>
+
+    <div class="container">
+        <textarea id="textInput" placeholder="Type your text here..."></textarea>
+
+        <div class="buttons">
+            <button onclick="encryptText()">Encrypt</button>
+            <button onclick="decryptText()">Decrypt</button>
+        </div>
+
+        <h2>Output:</h2>
+        <div class="output-container">
+            <textarea id="outputText" readonly></textarea>
+            <button onclick="copyText()">📋 Copy</button>
+        </div>
+
+        <h2>Or Upload a File:</h2>
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Extract & Encrypt</button>
+
+        <p id="statusMessage"></p> <!-- Shows encryption/decryption time -->
+        <div id="loadingSpinner" class="hidden"></div> <!-- Buffer Animation -->
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById("loadingSpinner").classList.remove("hidden");
+            document.getElementById("statusMessage").innerText = "Processing...";
+        }
+
+        function hideLoading(time) {
+            document.getElementById("loadingSpinner").classList.add("hidden");
+            document.getElementById("statusMessage").innerText = `Completed in ${time} sec`;
+        }
+
+        async function encryptText() {
+            showLoading();
+            let text = document.getElementById("textInput").value;
+            let response = await fetch("/encrypt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+            let result = await response.json();
+            document.getElementById("outputText").value = result.encrypted;
+            hideLoading(result.time);
+        }
+
+        async function decryptText() {
+            showLoading();
+            let text = document.getElementById("textInput").value;
+            let response = await fetch("/decrypt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+            let result = await response.json();
+            document.getElementById("outputText").value = result.decrypted;
+            hideLoading(result.time);
+        }
+
+        async function uploadFile() {
+            showLoading();
+            let file = document.getElementById("fileInput").files[0];
+            let formData = new FormData();
+            formData.append("file", file);
+
+            let response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.json();
+            if (result.error) {
+                document.getElementById("statusMessage").innerText = result.error;
+                hideLoading(0);
+            } else {
+                document.getElementById("outputText").value = result.encrypted;
+                hideLoading(result.time);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
